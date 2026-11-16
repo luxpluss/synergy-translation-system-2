@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переводчик Синергия</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 600px;
+        }
+        h1 { text-align: center; color: #333; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            min-height: 50px;
+            font-size: 18px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Переводчик Синергия</h1>
+        <p>Русский → English</p>
+        
+        <textarea id="inputText" placeholder="Введите текст на русском..."></textarea>
+        <button id="translateBtn" onclick="translateText()">Перевести</button>
+        
+        <div class="result" id="resultText">Здесь появится перевод...</div>
+    </div>
+
+    <script>
+        async function translateText() {
+            const text = document.getElementById('inputText').value;
+            const btn = document.getElementById('translateBtn');
+            const result = document.getElementById('resultText');
+
+            if (!text.trim()) {
+                result.innerText = "Пожалуйста, введите текст.";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Перевод...";
+            result.innerText = "Ожидание ответа от сервера...";
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+                result.innerText = data.translation;
+            } catch (error) {
+                result.innerText = "Ошибка: Сервер не отвечает. Убедитесь, что бэкенд запущен.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Перевести";
+            }
+        }
+    </script>
+</body>
+</html>
